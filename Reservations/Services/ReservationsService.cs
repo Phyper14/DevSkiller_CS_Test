@@ -60,7 +60,7 @@ namespace Reservations.Services
 
             var result = ValidationResult.Default;
 
-            if (newReservation.From >= newReservation.to) {
+            if (newReservation.From >= newReservation.To) {
                 result = ValidationResult.ToBeforeFrom;
             }
             // TODO
