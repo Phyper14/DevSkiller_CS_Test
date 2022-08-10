@@ -60,8 +60,8 @@ namespace Reservations.Services
 
             var result = ValidationResult.Default;
 
-            if (newReservation.From >= newReservation.To) {
-                result = ValidationResult.ToBeforeFrom;
+            if (newReservation.From.Date != newReservation.To) {
+                result = ValidationResult.MoreThanOneDay;
             }
             // TODO
             // Implement following validation rules:
