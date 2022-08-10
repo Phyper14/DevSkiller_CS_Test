@@ -60,7 +60,9 @@ namespace Reservations.Services
 
             var result = ValidationResult.Default;
 
-
+            if (newReservation.From >= newReservation.to) {
+                result = ValidationResult.ToBeforeFrom;
+            }
             // TODO
             // Implement following validation rules:
             // (idea is to check all and give customer full information, not to stop after first fail - therefore enum with [Flags] Attribute is returned)
