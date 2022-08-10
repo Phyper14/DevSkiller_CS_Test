@@ -66,6 +66,19 @@ namespace Reservations.Services
             if  (newReservation.From.Hour >= newReservation.To.Hour) {
                 result = ValidationResult.ToBeforeFrom;
             }
+            TimeSpan start = new TimeSpan(8, 0, 0); //10 o'clock
+            TimeSpan end = new TimeSpan(18, 0, 0); //12 o'clock
+            TimeSpan now = DateTime.Now.TimeOfDay;
+
+            if ((now < start) || (now > end))
+            {
+                result  = ValidationResult.OutsideWorkingHours;
+            }
+
+            if ((newReservation.To.Hour - newReservation.From.Hour) > 3) {
+                result = ValidationResult.TooLong;
+            }
+            
             // TODO
             // Implement following validation rules:
             // (idea is to check all and give customer full information, not to stop after first fail - therefore enum with [Flags] Attribute is returned)
