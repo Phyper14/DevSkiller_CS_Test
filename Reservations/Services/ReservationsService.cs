@@ -60,11 +60,13 @@ namespace Reservations.Services
 
             var result = ValidationResult.Default;
 
-            if (newReservation.From.Day != newReservation.To.Day) {
-                result = ValidationResult.MoreThanOneDay;
+            if (newReservation.From.Day != newReservation.To.Day)
+            {
+                result |= ValidationResult.MoreThanOneDay;
             }
-            if  (newReservation.From.Hour >= newReservation.To.Hour) {
-                result = ValidationResult.ToBeforeFrom;
+            if (newReservation.From.Hour >= newReservation.To.Hour)
+            {
+                result |= ValidationResult.ToBeforeFrom;
             }
             TimeSpan start = new TimeSpan(8, 0, 0); //10 o'clock
             TimeSpan end = new TimeSpan(18, 0, 0); //12 o'clock
@@ -72,13 +74,36 @@ namespace Reservations.Services
 
             if ((now < start) || (now > end))
             {
-                result  = ValidationResult.OutsideWorkingHours;
+                result |= ValidationResult.OutsideWorkingHours;
             }
 
-            if ((newReservation.To.Hour - newReservation.From.Hour) > 3) {
-                result = ValidationResult.TooLong;
+            if ((newReservation.To.Hour - newReservation.From.Hour) >= 3)
+            {
+                result |= ValidationResult.TooLong;
             }
-            
+
+            var todos = _queryAll.Execute().FirstOrDefault(x => x.Hall.Number == newReservation.LectureHallNumber && x.From.Date == newReservation.From.Date && (x.From.Hour < newReservation.To.Hour) && (newReservation.From.Hour < x.To.Hour));
+            if (todos != null)
+            {
+                result |= ValidationResult.Conflicting;
+            }
+
+            var lectureHalls = _queryAllLectureHalls.Execute().FirstOrDefault(x => x.Number == newReservation.LectureHallNumber);
+            if (lectureHalls == null)
+                result |= ValidationResult.HallDoesNotExist;
+
+            var allLecture = _queryAllLecturers.Execute().FirstOrDefault(x => x.Id == newReservation.LecturerId);
+            if (allLecture == null)
+                result |= ValidationResult.LecturerDoesNotExist;
+
+            if (result.HasFlag(ValidationResult.TooLong) && result.HasFlag(ValidationResult.OutsideWorkingHours) && result.HasFlag(ValidationResult.Conflicting) && result.HasFlag(ValidationResult.LecturerDoesNotExist))
+            {
+                
+            } else
+            {
+                result |= ValidationResult.Ok;
+            }
+
             // TODO
             // Implement following validation rules:
             // (idea is to check all and give customer full information, not to stop after first fail - therefore enum with [Flags] Attribute is returned)
